@@ -345,6 +345,25 @@ int pull_work_rsp(minergate_do_job_rsp_sp30 *r, minergate_adapter *adapter) {
   pthread_mutex_unlock(&network_hw_mutex);
   return 0;
 }
+
+static
+ssize_t rw_all(void *func_p, const int fd, void * const buf, size_t count)
+{
+  ssize_t (*func)(int, const void *, size_t) = (ssize_t (*)(int, const void *, size_t))func_p;
+  char *p = (char *)buf;
+  ssize_t ret = 0;
+  while (count)
+  {
+    ssize_t rv = func(fd, p, count);
+    if (rv <= 0)
+      return rv;
+    ret += rv;
+    p += rv;
+    count -= rv;
+  }
+  return ret;
+}
+
 extern pthread_mutex_t asic_mutex;
 //
 // Support new minergate client
@@ -372,7 +391,7 @@ void *connection_handler_thread(void *adptr) {
   // Read packet
   struct timeval last_time;
   gettimeofday(&last_time, NULL);
-  while ((nbytes = read(adapter->connection_fd, (void *)adapter->last_req,
+  while ((nbytes = rw_all((void *)read, adapter->connection_fd, (void *)adapter->last_req,
                         sizeof(minergate_req_packet_sp30))) > 0) {
     struct timeval now;
     unsigned long long int usec;
@@ -450,7 +469,7 @@ void *connection_handler_thread(void *adptr) {
       // adapter, adapter);
       adapter->next_rsp->request_id = adapter->last_req->request_id;
       // Send response
-      write(adapter->connection_fd, (void *)adapter->next_rsp,
+      rw_all((void *)write, adapter->connection_fd, (void *)adapter->next_rsp,
             sizeof(minergate_rsp_packet_sp30));
 
       // Clear packet.
