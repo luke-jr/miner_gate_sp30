@@ -2,7 +2,7 @@
 # --- macros
 CC=arm-none-linux-gnueabi-g++
 #MUST OPTIMISE -O3 FOR 1.4!
-CFLAGS= -O0 -g -rdynamic -fpermissive -lpthread -static-libstdc++ -static-libgcc -DDC2DC_CHECK_ON_ERROR -DMINERGATE
+CFLAGS= -O0 -g -rdynamic -fpermissive -lpthread -static-libstdc++ -static-libgcc -DDC2DC_CHECK_ON_ERROR -DMINERGATE -Wall -Wno-sign-compare
 LIBS = -L./ -lpthread
 SRCS = $(wildcard *.c ../i2ctools/mainvpd_lib.cpp)
 INCLUDES = -I./

@@ -28,15 +28,13 @@ int ignorable_err;
 
 #define SLEEP_TIME_I2C 500
 
-static char buf[10] = { 0 };
-
 
 // set the I2C slave address for all subsequent I2C device transfers
 static void i2c_set_address(int address, int *pError) {
   passert(file);
   int ioctl_err;
   if ((ioctl_err = ioctl(file, I2C_SLAVE, address)) < 0) {
-    passert(0, "i2c-ff");
+    passert(0 && "i2c-ff");
   }  
   *pError = ioctl_err;
 }
@@ -296,7 +294,7 @@ uint16_t i2c_read_word(uint8_t addr, uint8_t command, int *pError) {
     r = i2c_smbus_read_word_data(file, command, pError);
     if ( *pError != 0) {
 #ifdef MINERGATE
-    	psyslog(RED "i2c read word 0x%x 0x%x error8\n" RESET, addr, command, *pError);
+    	psyslog(RED "i2c read word 0x%x 0x%x error8 %d\n" RESET, addr, command, *pError);
 #else
     	perror("i2c read word error8\n");
 #endif

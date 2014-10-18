@@ -527,7 +527,6 @@ void disable_asic_forever_rt(int addr, const char* why) {
   if (why) {
     vm.asic[addr].why_disabled = why;
   }
-  int err;
   write_reg_asic(addr, NO_ENGINE,ADDR_GLOBAL_HASH_RESETN,0);
   write_reg_asic(addr, NO_ENGINE,ADDR_GLOBAL_CLK_EN,0);
   write_reg_asic(addr, NO_ENGINE,ADDR_INTR_MASK,0xFFFF);

@@ -40,7 +40,7 @@ int one_done_sw_rt_queue(RT_JOB *work);
 void *squid_regular_state_machine_rt(void *p);
 int init_asics(int addr);
 int do_bist_ok(bool store_limit = true, bool step_down_if_failed = true, int fast_bist = ALLOWED_BIST_FAILURE_ENGINES,const char* why="no reason");
-int do_bist_loop_push_job(const char* why);
+extern void do_bist_loop_push_job(const char* why);
 
 uint32_t crc32(uint32_t crc, const void *buf, size_t size);
 void push_asic_read(uint8_t asic_addr, uint8_t engine_addr ,uint32_t offset, uint32_t *p_value);

@@ -178,7 +178,6 @@ void exit_nicely(int seconds_sleep_before_exit, const char* why) {
   // Let other threads finish.
   //set_light(LIGHT_YELLOW, LIGHT_MODE_OFF);
   usleep(1000*1000);
-  int ii = 0;
   psyslog("Here comes unexpected death, lights off!\n");
 
   for (i = 0; i < ASICS_COUNT ; i++) {
@@ -402,7 +401,7 @@ void *connection_handler_thread(void *adptr) {
 
       if ((adapter->last_req->mask & 0x02)) {
          // Drop old requests
-         int mqs = mq_size();
+         mq_size();
          //psyslog("%d ------------------->> Drop old requests = mq size:%d\n",usec_stamp(), mqs);
          
          // Cancel Adapter req queue queue         
@@ -424,7 +423,7 @@ void *connection_handler_thread(void *adptr) {
          // Give "STOP" to FPGA
          stop_all_work_rt();
        } else {
-        int mqs = mq_size();
+        mq_size();
         //psyslog("%d ------------------>>Push OK:%d (%d pkts)\n",usec_stamp(), mqs, array_size);
        }
 
@@ -709,7 +708,6 @@ int discover_good_loops_restart_12v() {
 }
 
 int get_print_win(int winner_device, int winner_engine);
-int update_ac2dc_power_measurments();
 
 
 void read_disabled_asics() {
@@ -982,7 +980,7 @@ void read_fet() {
 }
 
 
-int update_work_mode(int decrease_top, int decrease_bottom, bool to_alternative_file) {
+void update_work_mode(int decrease_top, int decrease_bottom, bool to_alternative_file) {
   FILE* file = fopen (MG_CUSTOM_MODE_FILE, "r");
   passert(file != NULL);
 #ifdef SP2x
@@ -1033,11 +1031,13 @@ int update_work_mode(int decrease_top, int decrease_bottom, bool to_alternative_
 }
 
 
+#ifndef SP2x
 static int apl_105[4] = {0,AC2DC_POWER_LIMIT_105_MU,AC2DC_POWER_LIMIT_105_MU,AC2DC_POWER_LIMIT_105_EM};
 static int apl_114[4] = {0,AC2DC_POWER_LIMIT_114_MU,AC2DC_POWER_LIMIT_114_MU,AC2DC_POWER_LIMIT_114_EM};
 static int apl_119[4] = {0,AC2DC_POWER_LIMIT_119_MU,AC2DC_POWER_LIMIT_119_MU,AC2DC_POWER_LIMIT_119_EM};
 static int apl_200[4] = {0,AC2DC_POWER_LIMIT_200_MU,AC2DC_POWER_LIMIT_200_MU,AC2DC_POWER_LIMIT_200_EM};
 static int apl_210[4] = {0,AC2DC_POWER_LIMIT_210_MU,AC2DC_POWER_LIMIT_210_MU,AC2DC_POWER_LIMIT_210_EM};
+#endif
 
 void store_last_voltage() {
   int r;
@@ -1050,42 +1050,52 @@ void store_last_voltage() {
             (vm.asic[0].dc2dc.vtrim),
             (vm.asic[1].dc2dc.vtrim),     
             (vm.asic[2].dc2dc.vtrim));
+  assert(r > 0);
   r = fprintf (file, "3:%d 4:%d 5:%d\n" ,
             (vm.asic[3].dc2dc.vtrim),
             (vm.asic[4].dc2dc.vtrim),            
             (vm.asic[5].dc2dc.vtrim));
+  assert(r > 0);
   r = fprintf (file, "6:%d 7:%d 8:%d\n" ,
             (vm.asic[6].dc2dc.vtrim),
             (vm.asic[7].dc2dc.vtrim),            
             (vm.asic[8].dc2dc.vtrim));
+  assert(r > 0);
   r = fprintf (file, "9:%d 10:%d 11:%d\n", 
             (vm.asic[9].dc2dc.vtrim),
             (vm.asic[10].dc2dc.vtrim),            
             (vm.asic[11].dc2dc.vtrim));
+  assert(r > 0);
   r = fprintf (file, "12:%d 13:%d 14:%d\n", 
             (vm.asic[12].dc2dc.vtrim),
             (vm.asic[13].dc2dc.vtrim),            
             (vm.asic[14].dc2dc.vtrim));
+  assert(r > 0);
   r = fprintf (file, "15:%d 16:%d 17:%d\n" ,
             (vm.asic[15].dc2dc.vtrim),
             (vm.asic[16].dc2dc.vtrim),            
             (vm.asic[17].dc2dc.vtrim));
+  assert(r > 0);
   r = fprintf (file, "18:%d 19:%d 20:%d\n" ,
             (vm.asic[18].dc2dc.vtrim),
             (vm.asic[19].dc2dc.vtrim),            
             (vm.asic[20].dc2dc.vtrim));
+  assert(r > 0);
   r = fprintf (file, "21:%d 22:%d 23:%d\n" ,
             (vm.asic[21].dc2dc.vtrim),
             (vm.asic[22].dc2dc.vtrim),            
             (vm.asic[23].dc2dc.vtrim));
+  assert(r > 0);
   r = fprintf (file, "24:%d 25:%d 26:%d\n" ,
             (vm.asic[24].dc2dc.vtrim),
             (vm.asic[25].dc2dc.vtrim),            
             (vm.asic[26].dc2dc.vtrim));
+  assert(r > 0);
   r = fprintf (file, "27:%d 28:%d 29:%d\n" ,
             (vm.asic[27].dc2dc.vtrim),
             (vm.asic[28].dc2dc.vtrim),            
             (vm.asic[29].dc2dc.vtrim));
+  assert(r > 0);
   fclose(file);
 }
 
@@ -1100,51 +1110,60 @@ void read_last_voltage() {
             &vm.asic[0].dc2dc.before_failure_vtrim,
             &vm.asic[1].dc2dc.before_failure_vtrim,            
             &vm.asic[2].dc2dc.before_failure_vtrim);
+  assert(r == 3);
   r = fscanf (file, "3:%d 4:%d 5:%d\n" ,
             &vm.asic[3].dc2dc.before_failure_vtrim,
             &vm.asic[4].dc2dc.before_failure_vtrim,            
             &vm.asic[5].dc2dc.before_failure_vtrim);
+  assert(r == 3);
   r = fscanf (file, "6:%d 7:%d 8:%d\n" ,
             &vm.asic[6].dc2dc.before_failure_vtrim,
             &vm.asic[7].dc2dc.before_failure_vtrim,            
             &vm.asic[8].dc2dc.before_failure_vtrim);
+  assert(r == 3);
   r = fscanf (file, "9:%d 10:%d 11:%d\n", 
             &vm.asic[9].dc2dc.before_failure_vtrim,
             &vm.asic[10].dc2dc.before_failure_vtrim,            
             &vm.asic[11].dc2dc.before_failure_vtrim);
+  assert(r == 3);
   r = fscanf (file, "12:%d 13:%d 14:%d\n", 
             &vm.asic[12].dc2dc.before_failure_vtrim,
             &vm.asic[13].dc2dc.before_failure_vtrim,            
             &vm.asic[14].dc2dc.before_failure_vtrim);
+  assert(r == 3);
   r = fscanf (file, "15:%d 16:%d 17:%d\n" ,
             &vm.asic[15].dc2dc.before_failure_vtrim,
             &vm.asic[16].dc2dc.before_failure_vtrim,            
             &vm.asic[17].dc2dc.before_failure_vtrim);
+  assert(r == 3);
   r = fscanf (file, "18:%d 19:%d 20:%d\n" ,
             &vm.asic[18].dc2dc.before_failure_vtrim,
             &vm.asic[19].dc2dc.before_failure_vtrim,            
             &vm.asic[20].dc2dc.before_failure_vtrim);
+  assert(r == 3);
   r = fscanf (file, "21:%d 22:%d 23:%d\n" ,
             &vm.asic[21].dc2dc.before_failure_vtrim,
             &vm.asic[22].dc2dc.before_failure_vtrim,            
             &vm.asic[23].dc2dc.before_failure_vtrim);
+  assert(r == 3);
   r = fscanf (file, "24:%d 25:%d 26:%d\n" ,
             &vm.asic[24].dc2dc.before_failure_vtrim,
             &vm.asic[25].dc2dc.before_failure_vtrim,            
             &vm.asic[26].dc2dc.before_failure_vtrim);
+  assert(r == 3);
   r = fscanf (file, "27:%d 28:%d 29:%d\n" ,
             &vm.asic[27].dc2dc.before_failure_vtrim,
             &vm.asic[28].dc2dc.before_failure_vtrim,            
             &vm.asic[29].dc2dc.before_failure_vtrim);
+  assert(r == 3);
   fclose(file);
 }
 
 
 
-int read_work_mode() {
+void read_work_mode() {
 	FILE* file = fopen (MG_CUSTOM_MODE_FILE, "r");
  
-	int i = 0;
   passert(file != NULL);
 #ifdef SP2x 
   int ret =  fscanf (file, "FAN:%d VS0:%d VS1:%d VS2:%d VS3:%d VMAX:%d AC0:%d AC1:%d AC2:%d AC3:%d DC_AMP:%d", 
@@ -1407,14 +1426,14 @@ void restart_asics_full(int reason,const char * why) {
 
   // Test AC2DC    
   static ASIC asics[ASICS_COUNT];
-  int has_chiko = -1;
+//   int has_chiko = -1;
   for(int i = 0; i < ASICS_COUNT; i++) {
     asics[i] = vm.asic[i];
     ASIC *a = &vm.asic[i];
     if (a->asic_present) {
       update_dc2dc_stats(i);
       if (vm.asic[i].dc2dc.dc_current_16s < 7*16) {
-          has_chiko = i;
+//           has_chiko = i;
           mg_event_x("Lazy asic %d",i);
       }
     }
@@ -1669,8 +1688,6 @@ int main(int argc, char *argv[]) {
   init_pwm();
   // Enable ALL dc2dc
   dc2dc_init();
-  int addr;
-  int err;
   psyslog("init_pwm\n");
   //exit(0);
   reset_sw_rt_queue();
@@ -1732,7 +1749,6 @@ int main(int argc, char *argv[]) {
   if ((argc > 1) && strcmp(argv[1], "--stress") == 0) {
     //struct timeval tv;
     psyslog("Starting stress loop\n");
-    int f;
     uint32_t value[50];
     while (1) {
       //start_stopper(&tv);      

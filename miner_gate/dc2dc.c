@@ -646,7 +646,7 @@ void dc2dc_set_vtrim(int addr, uint32_t vtrim, bool vmargin_75low  , int *err, c
 
 // returns AMPERS
 // Mutex locked from above!
-int dc2dc_get_current_16s_of_amper_channel(
+void dc2dc_get_current_16s_of_amper_channel(
       int addr, 
       int chanel_id,
       int dc2dc_channel_i2c_addr,
@@ -671,7 +671,7 @@ int dc2dc_get_current_16s_of_amper_channel(
   DBG(DBG_TMP, "%d: temp=%d\n",addr, *temp);  
   
   if (*err) {
-    return 0;
+    return;
   }
   *current = (i2c_read_word(dc2dc_channel_i2c_addr, 0x8c) & 0x07FF);
 //  psyslog("CURRENT %d:%d =%d\n",addr, chanel_id*2 ,(*current)/16);
@@ -744,7 +744,7 @@ int dc2dc_get_current_16s_of_amper_channel(
   }
   dc2dc_set_phase(dc2dc_channel_i2c_addr, 0x81, err);
   if (*err) {
-    return 0;
+    return;
   }
   
 
@@ -771,7 +771,6 @@ int dc2dc_get_all_stats(
   pthread_mutex_lock(&i2c_mutex);
   *overcurrent_err = 0;
   *overcurrent_warning = 0;  
-  static int warned = 0;
   dc2dc_select_i2c(addr, err);
   int phaze_overcurrent_err[2]  = {0,0};
   int phaze_overcurrent_warning[2] = {0,0};

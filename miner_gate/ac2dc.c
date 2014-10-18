@@ -24,7 +24,6 @@
 extern MINER_BOX vm;
 extern pthread_mutex_t i2c_mutex;
 static int mgmt_addr[5] = {0, AC2DC_MURATA_NEW_I2C_MGMT_DEVICE, AC2DC_MURATA_OLD_I2C_MGMT_DEVICE, AC2DC_EMERSON_1200_I2C_MGMT_DEVICE, AC2DC_EMERSON_1600_I2C_MGMT_DEVICE};
-static int eeprom_addr[5] = {0, AC2DC_MURATA_NEW_I2C_EEPROM_DEVICE, AC2DC_MURATA_OLD_I2C_EEPROM_DEVICE, AC2DC_EMERSON_1200_I2C_EEPROM_DEVICE,AC2DC_EMERSON_1600_I2C_EEPROM_DEVICE};
 static int revive_code_off[5] = {0, 0x0, 0x0, 0x40, 0x40};
 static int revive_code_on[5] = {0, 0x80, 0x80, 0x80, 0x80};
 static int psu_addr[PSU_COUNT]  = {PRIMARY_I2C_SWITCH_AC2DC_PSU_0_PIN, PRIMARY_I2C_SWITCH_AC2DC_PSU_1_PIN}; 
@@ -41,12 +40,13 @@ char* psu_get_name(int id, int type) {
   } else {
       psyslog("ILEGAL PSU %d TYPE %d\n", id, type);
       passert(0);
+      return NULL;
   } 
 }
 
 
 // Return Watts
-/*
+#if 0
 static int ac2dc_get_power(AC2DC *ac2dc, int psu_id) {
   int err = 0;
   static int warned = 0;
@@ -62,7 +62,7 @@ static int ac2dc_get_power(AC2DC *ac2dc, int psu_id) {
     usleep(1000000);
     system("echo 111 > /sys/class/gpio/unexport");
     passert(0);
-    * /
+    */
   }
   if (err) {
     if ((warned++) < 10)
@@ -74,7 +74,7 @@ static int ac2dc_get_power(AC2DC *ac2dc, int psu_id) {
 
   return power;
 }
-*/
+#endif
 
 
 bool ac2dc_check_connected(int psu_id) {
@@ -113,7 +113,7 @@ void ac2dc_init_one(AC2DC* ac2dc, int psu_id) {
  
  i2c_write(PRIMARY_I2C_SWITCH, psu_addr[psu_id] | PRIMARY_I2C_SWITCH_DEAULT, &err);  
  
-     int res = i2c_read_word(AC2DC_MURATA_OLD_I2C_MGMT_DEVICE, AC2DC_I2C_READ_TEMP_WORD, &err);
+     i2c_read_word(AC2DC_MURATA_OLD_I2C_MGMT_DEVICE, AC2DC_I2C_READ_TEMP_WORD, &err);
       if (!err) {
 #ifdef MINERGATE
         psyslog("OLD MURATA AC2DC LOCATED\n");
@@ -355,7 +355,6 @@ int ac2dc_get_eeprom(int offset, int psu_id, AC2DC *ac2dc, int *pError) {
 #ifdef MINERGATE
 int update_work_mode(int decrease_top, int decrease_bottom, bool to_alternative);
 void exit_nicely(int seconds_sleep_before_exit, const char* p);
-static pthread_t ac2dc_thread;
 
 void test_fix_ac2dc_limits() {
 #ifdef SP2x
@@ -449,7 +448,7 @@ void update_single_psu(AC2DC *ac2dc, int psu_id) {
      DBG( DBG_SCALING ,"PowerIn: %d\n", ac2dc->ac2dc_in_power);
    } else {
      //ac2dc->ac2dc_in_power = 0;
-     DBG( DBG_SCALING ,"PowerIn: Error\n", ac2dc->ac2dc_in_power);
+     DBG( DBG_SCALING ,"PowerIn: Error\n");
    }
    
 //   i2c_write(PRIMARY_I2C_SWITCH, i2c_switch);  
@@ -471,7 +470,7 @@ void update_single_psu(AC2DC *ac2dc, int psu_id) {
                ac2dc->ac2dc_power_last,
                ac2dc->ac2dc_power_last_last);
    } else {
-     DBG( DBG_SCALING ,"PowerOut: Error\n", ac2dc->ac2dc_power);
+     DBG( DBG_SCALING ,"PowerOut: Error\n");
    }
 //   i2c_write(PRIMARY_I2C_SWITCH, i2c_switch);  
 //   i2c_write(PRIMARY_I2C_SWITCH, i2c_switch);      
@@ -488,9 +487,7 @@ void update_single_psu(AC2DC *ac2dc, int psu_id) {
 
 void *update_ac2dc_power_measurments_thread(void *ptr) {
   pthread_mutex_lock(&i2c_mutex);  
-  int err;  
   AC2DC *ac2dc;
-  int p;
 
   for (int psu_id = 0; psu_id < PSU_COUNT; psu_id++) {
     ac2dc = &vm.ac2dc[psu_id];
@@ -523,7 +520,7 @@ void *update_ac2dc_power_measurments_thread(void *ptr) {
   return NULL;
 }
 
-int update_ac2dc_power_measurments() {
+void update_ac2dc_power_measurments() {
   update_ac2dc_power_measurments_thread(NULL);
 }
 

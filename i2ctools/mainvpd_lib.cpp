@@ -142,7 +142,7 @@ int set_fet(int topOrBottom , int fet_type){
 	usleep(2000);
 
 	const char * fetstr = FET_CODE_2_STR[fet_type];
-	int b ;
+	unsigned b;
 	for (b = 0 ; b < strlen(fetstr); b++)
 	{
 		i2c_write_byte(MAIN_BOARD_I2C_EEPROM_DEV_ADDR, b+MAIN_BOARD_VPD_FET_STR_ADDR_START  , fetstr[b] , &err);
@@ -152,7 +152,6 @@ int set_fet(int topOrBottom , int fet_type){
 	}
 	i2c_write_byte(MAIN_BOARD_I2C_EEPROM_DEV_ADDR, b+MAIN_BOARD_VPD_FET_STR_ADDR_START  , '\0' , &err);
 
-	get_out:
 	resetI2CSwitches();
 	pthread_mutex_unlock(&i2c_mutex);
 	return rc;
@@ -239,14 +238,12 @@ int mainboard_set_vpd(  int topOrBottom, const char * vpd){
 
 	int rc = 0;
 	int err=0;
-	bool firstTimeBurn = false;
 
 	pthread_mutex_lock(&i2c_mutex);
 	err = setI2CSwitches(topOrBottom);
 
 	int vpdrev =  (unsigned char)i2c_read_byte(MAIN_BOARD_I2C_EEPROM_DEV_ADDR, 0 , &err);
 	if (vpdrev == 0xFF){
-			firstTimeBurn = true;
 			i2c_write_byte(MAIN_BOARD_I2C_EEPROM_DEV_ADDR, 0 , MAIN_VPD_REV , &err);
 			usleep(2000);
 			for (int a = 1 ; a < MAIN_BOARD_VPD_EEPROM_SIZE ; a++){

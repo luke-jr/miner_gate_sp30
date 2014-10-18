@@ -105,7 +105,6 @@ int yellow_on;
 
 // 2 lamps - 0=green, 1=yellow
 void set_light_on_off(int light_id, int on) {
-  LIGHT_MODE* lm;
   int* ls;
   if (light_id==LIGHT_YELLOW) {
    ls = &yellow_on;
@@ -142,7 +141,6 @@ void set_light_on_off(int light_id, int on) {
 
 void leds_periodic_100_msecond_led(int light_id,int counter) {
   LIGHT_MODE* lm = (light_id==LIGHT_GREEN)?&lm_green:&lm_yellow;
-  int* l_on = (light_id==LIGHT_GREEN)?&green_on:&yellow_on;
 
   if (*lm == LIGHT_MODE_FAST_BLINK) {
     set_light_on_off(light_id, (counter)%2);
@@ -169,15 +167,12 @@ void set_light(int light_id, LIGHT_MODE m) {
 
 //  echo 1 > /sys/class/gpio/gpio22/value
   LIGHT_MODE* lm;
-  int* ls;
 
   if (light_id==LIGHT_YELLOW) {
     passert(0);
     lm = &lm_yellow;
-    ls = &yellow_on;
   } else {
     lm = &lm_green;
-    ls = &green_on;
   }
  
 

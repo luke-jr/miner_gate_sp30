@@ -55,7 +55,6 @@ void poll_win_temp_rt();
 static int one_sec_counter = 0;
 int total_devices = 0;
 extern int enable_reg_debug;
-int update_ac2dc_power_measurments();
 
 RT_JOB *add_to_sw_rt_queue(const RT_JOB *work);
 void reset_sw_rt_queue();
@@ -423,9 +422,11 @@ void push_to_hw_queue_rt(RT_JOB *work) {
   //write_reg_asic(ANY_ASIC, NO_ENGINE,ADDR_COMMAND, BIT_CMD_END_JOB_IF_Q_FULL);
   PUSH_JOB(ADDR_COMMAND, BIT_ADDR_COMMAND_FIFO_LOAD);
   FLUSH_JOB();
-  uint32_t status = read_spi(ADDR_SQUID_STATUS);
+//   uint32_t status =
+  read_spi(ADDR_SQUID_STATUS);
 //  parse_squid_status(status);
-  uint32_t q_status = read_spi(ADDR_SQUID_QUEUE_STATUS);
+//   uint32_t q_status =
+  read_spi(ADDR_SQUID_QUEUE_STATUS);
 //  parse_squid_q_status(q_status);
 
 }
@@ -564,7 +565,6 @@ int allocate_addresses_to_devices() {
             vm.asic[addr].not_brocken_engines[i] = 0;
           }
 
-          int err;
           //dc2dc_disable_dc2dc(addr,&err);
           //vm.asic[addr].dc2dc.dc2dc_present = 0;
           psyslog("Disabling asic %d dc2dc present: (%d)\n", 
@@ -865,7 +865,7 @@ BIST_VECTOR bist_tests[TOTAL_BISTS] =
 };
 */
 
-int do_bist_loop_push_job(const char* why) {
+void do_bist_loop_push_job(const char* why) {
   int f;
   int i = 0;
   // Save engines needed only at minimal freq so we can disable them.
@@ -1069,7 +1069,6 @@ usleep(1000);
 
 
   for (int addr = 0; addr < ASICS_COUNT; addr++) {
-    uint32_t bist_passed[ENGINE_BITMASCS]; //     
     ASIC* a = &vm.asic[addr];
     if (a->asic_present) {
         int passed = 0;
@@ -1170,7 +1169,6 @@ int has_work_req();
 
 
 void set_initial_voltage_freq_on_restart() {
-   int f;
    int err;
    // SET VOLTAGE
    for (int i = 0 ; i < ASICS_COUNT; i++) {
@@ -1409,7 +1407,6 @@ void once_second_scaling_logic() {
   }
 
 #ifdef RUNTIME_BIST
-    static int current_dc2dc_to_up = 0; 
     // Periodcally up DC voltage
     if (
         (
@@ -1439,7 +1436,6 @@ void once_second_scaling_logic() {
               break;
             } else {
               i++;
-              ASIC *a = &vm.asic[best];
               DBG(DBG_SCALING,"UPSCALE %d\n", best);
               dc2dc_up(best,&err,"upvolt time");
             }
@@ -1571,7 +1567,6 @@ void one_minute_tasks() {
 
 // For Remo use only
 void print_production() {
-  int err;
   int hash_power = 0;
   FILE *f = fopen("/var/log/production", "w");
   if (!f) {
@@ -1660,7 +1655,6 @@ void print_production() {
 //void store_last_voltage();
 
 void print_scaling() {
-  int err;
   vm.total_mhash = 0;
   int total_hash[2];
   total_hash[0] = total_hash[1] = 0;
@@ -1672,10 +1666,8 @@ void print_scaling() {
 
   //asic_iter_init(&hi);
 
-  int wanted_hash_power=0;
   int total_loops=0;
   int total_asics=0;
-  int expected_rate=0;
   fprintf(f, GREEN "Uptime:%lu | FPGA ver:%d\n" , (unsigned long)time(NULL) - vm.start_run_time, vm.fpga_ver);
 
 
@@ -1895,7 +1887,7 @@ int dc2dc_can_up(int i) {
          (vm.asic[i].dc2dc.dc_temp < vm.asic[i].dc2dc.dc_temp_limit) && ++p &&         
          (vm.ac2dc[ASIC_TO_PSU_ID(i)].ac2dc_power_limit - vm.ac2dc[ASIC_TO_PSU_ID(i)].ac2dc_power > 5) && ++p);
   //DBG(DBG_SCALING,"P[%d]=%d\n", i,p);
-
+  return ret;
 }
 
 
@@ -1991,8 +1983,6 @@ void asic_up_freq(int i, int wait_pll_lock, int disable_enable_engines, const ch
 void update_dc2dc_stats(int i) {
   int overcurrent_err;
   int overcurrent_warning;
-  uint8_t temp;
-  int current;
   int err;
 
   if (vm.asic[i].dc2dc.dc2dc_present) {
@@ -2190,7 +2180,6 @@ void poll_win_temp_rt() {
   static int measure_temp_addr = 0;
   uint32_t intr;
   uint32_t win_reg = 0;
-  uint32_t range; 
   static int counter=0;
   counter++;
   if ((counter%ASICS_COUNT) == 0 ) {
@@ -2340,7 +2329,7 @@ void ping_watchdog() {
 
 // 666 times a second
 void once_2_msec_tasks_rt() {
-  static struct timeval tv;
+//   static struct timeval tv;
 
   static int counter = 0;
   counter++;
@@ -2386,7 +2375,7 @@ void once_2_msec_tasks_rt() {
     poll_win_temp_rt();
   }
   if (counter % (500) == 0) {
-    struct timeval tv;
+//     struct timeval tv;
     //start_stopper(&tv);
     once_second_tasks_rt();
     //end_stopper(&tv,CYAN "ONE_SEC" RESET);
