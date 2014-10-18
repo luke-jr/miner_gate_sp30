@@ -25,7 +25,7 @@ all: $(FILE_DEPS) Makefile
 
 # --- remove binary and executable files
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET20) $(TARGET30)
 
 depend: $(SRCS)
 	makedepend $(INCLUDES) --$(CFLAGS) --$(SRCS) $^
