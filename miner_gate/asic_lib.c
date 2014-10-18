@@ -1676,7 +1676,7 @@ void print_scaling() {
   int total_loops=0;
   int total_asics=0;
   int expected_rate=0;
-  fprintf(f, GREEN "Uptime:%d | FPGA ver:%d\n" , time(NULL) - vm.start_run_time, vm.fpga_ver);
+  fprintf(f, GREEN "Uptime:%lu | FPGA ver:%d\n" , (unsigned long)time(NULL) - vm.start_run_time, vm.fpga_ver);
 
 
   
@@ -1850,8 +1850,8 @@ void ten_second_tasks() {
   static char x[200]; 
   
   //psyslog("MQ 10sec:%d\n", read_spi(ADDR_SQUID_MQ_SENT));
-  sprintf(x, "uptime:%d rst:%d\n", 
-          time(NULL) - vm.start_run_time, 
+  sprintf(x, "uptime:%lu rst:%d\n", 
+          (unsigned long)time(NULL) - vm.start_run_time, 
           vm.err_restarted);
   mg_status(x);
   //store_last_voltage();
@@ -2108,7 +2108,7 @@ void once_second_tasks_rt() {
     vm.asic[jj].idle_asic_cycles_this_min += vm.asic[jj].idle_asic_cycles_sec;
     
     if (vm.asic[jj].idle_asic_cycles_sec) {
-      psyslog(RED "[%d:I:%d%] mq=%d cons=%d\n" RESET, 
+      psyslog(RED "[%d:I:%d%d] mq=%d cons=%d\n" RESET, 
           jj,
           vm.asic[jj].idle_asic_cycles_sec/100000 , 
           vm.asic[jj].idle_asic_cycles_sec, 
@@ -2330,7 +2330,7 @@ void ping_watchdog() {
       psyslog("Failed to create watchdog file\n");
       return;
     }
-    fprintf(f, "minergate %d %d %d\n", vm.total_mhash, vm.consecutive_jobs, time(NULL));
+    fprintf(f, "minergate %d %d %lu\n", vm.total_mhash, vm.consecutive_jobs, (unsigned long)time(NULL));
     fclose(f);
 }
 

@@ -413,7 +413,7 @@ void push_mq_broadcast(uint32_t offset, uint32_t value) {
   }
   //printf("asic_serial_stack_size=%d\n",asic_serial_stack_size);
   if (enable_reg_debug) {
-      printf("%d - MQ: reg mq %04x %02x %x\n", usec_stamp(), (((int)ANY_ASIC)<<8)|ANY_ENGINE, offset, value);
+      printf("%lu - MQ: reg mq %04x %02x %x\n", usec_stamp(), (((int)ANY_ASIC)<<8)|ANY_ENGINE, offset, value);
   }
 
   create_serial_pkt(&l_d1, &l_d2, offset, 0, (((int)ANY_ASIC)<<8)|ANY_ENGINE, value, 0);
@@ -501,7 +501,7 @@ void push_asic_read(uint8_t asic_addr, uint8_t engine_addr ,  uint32_t offset, u
   e->data[1] = d2;
 
   if (0 && enable_reg_debug) {
-      printf("%d - prepare read %04x %02x (%x %x)\n", usec_stamp(), e->addr, offset,d1, d2);
+      printf("%lu - prepare read %04x %02x (%x %x)\n", usec_stamp(), e->addr, offset,d1, d2);
   }
 
   
@@ -528,7 +528,7 @@ void push_asic_write(uint8_t asic_addr, uint8_t engine_addr, uint32_t offset, ui
   // printf("---> %x %x\n",d1,d2);
   push_asic_serial_packet_to_hw(d1, d2);
   if (enable_reg_debug) {
-      printf("%d - reg h %04x %02x %x\n", usec_stamp(), (((int)asic_addr)<<8)|engine_addr, offset, value);
+      printf("%lu - reg h %04x %02x %x\n", usec_stamp(), (((int)asic_addr)<<8)|engine_addr, offset, value);
   }
 }
 int wait_rx_queue_ready() {
@@ -628,7 +628,7 @@ uint32_t _read_reg_actual(QUEUED_REG_ELEMENT *e, int *err) {
   uint32_t value = ((values[0] & 0x3F) << (32 - 6)) | ((values[1] >> 6) & 0x03FFFFFF);
 
   if (enable_reg_debug) {
-      printf("%d - reg h %04x %02x  #=%x\n", usec_stamp(), e->addr, e->offset, value);
+      printf("%lu - reg h %04x %02x  #=%x\n", usec_stamp(), e->addr, e->offset, value);
   }
 
   return value;
